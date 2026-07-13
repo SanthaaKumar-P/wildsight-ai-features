@@ -1,0 +1,25 @@
+# Virtual Environment
+venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# AI Models
+models/*.keras
+models/*.h5
+
+# Uploads
+uploads/
+
+# Prediction Output
+predictions/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Environment Variables
+.env
