@@ -5,21 +5,20 @@ venv/
 __pycache__/
 *.pyc
 
-# AI Models
-models/*.keras
-models/*.h5
+# Trained Models
+models/
 
-# Uploads
+# Uploaded Images
 uploads/
 
-# Prediction Output
+# Prediction Results
 predictions/
 
-# Jupyter
-.ipynb_checkpoints/
+# TensorBoard Logs
+logs/
 
 # VS Code
 .vscode/
 
-# Environment Variables
+# Environment
 .env
