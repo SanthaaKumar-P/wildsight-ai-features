@@ -20,4 +20,5 @@ def load_model():
 
         print("Model Loaded Successfully.")
 
+
     return model

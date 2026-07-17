@@ -1,5 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from app.audio_prediction import predict_audio
+from app.audio_constants import UPLOAD_AUDIO
+from app.species_api import router as species_router
 import os
 import shutil
 
@@ -10,7 +13,7 @@ app = FastAPI(
     description="AI Powered Wildlife Species Recognition API",
     version="1.0.0"
 )
-
+app.include_router(species_router)
 UPLOAD_FOLDER = "uploads"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -52,3 +55,12 @@ async def predict_image(file: UploadFile = File(...)):
             "model": "MobileNetV2"
         }
     )
+@app.post("/predict-audio")
+async def predict_audio_api(file: UploadFile = File(...)):
+
+    file_path = UPLOAD_AUDIO / file.filename
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return predict_audio(file_path)
