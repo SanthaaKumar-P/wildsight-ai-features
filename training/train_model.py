@@ -3,7 +3,7 @@ from pathlib import Path
 from dataset_loader import load_dataset
 from model_builder import build_model
 from callbacks import get_callbacks
-
+import json
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 PROJECT_ROOT = BASE_DIR.parent
@@ -25,7 +25,8 @@ print("Dataset Path:")
 print(DATASET_PATH)
 print("Exists:", DATASET_PATH.exists())
 train_ds, val_ds, class_names = load_dataset(DATASET_PATH)
-
+with open(MODEL_PATH / "class_names.json", "w") as file:
+    json.dump(class_names, file)
 print(f"Number of Species : {len(class_names)}")
 print("\nSpecies List:\n")
 print(class_names)

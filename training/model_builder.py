@@ -1,47 +1,23 @@
+from pathlib import Path
 import tensorflow as tf
 
-IMAGE_SIZE = (224, 224)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-def build_model(num_classes):
+MODEL_PATH = BASE_DIR / "models" / "wildlife_classifier.keras"
 
-    data_augmentation = tf.keras.Sequential([
-        tf.keras.layers.RandomFlip("horizontal"),
-        tf.keras.layers.RandomRotation(0.1),
-        tf.keras.layers.RandomZoom(0.1),
-        tf.keras.layers.RandomContrast(0.1),
-    ])
+model = None
 
-    base_model = tf.keras.applications.MobileNetV2(
-        input_shape=IMAGE_SIZE + (3,),
-        include_top=False,
-        weights="imagenet"
-    )
 
-    base_model.trainable = False
+def load_model():
 
-    inputs = tf.keras.Input(shape=IMAGE_SIZE + (3,))
+    global model
 
-    x = data_augmentation(inputs)
+    if model is None:
 
-    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
+        print("Loading Wildlife AI Model...")
 
-    x = base_model(x, training=False)
+        model = tf.keras.models.load_model(MODEL_PATH)
 
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-
-    x = tf.keras.layers.Dropout(0.3)(x)
-
-    outputs = tf.keras.layers.Dense(
-        num_classes,
-        activation="softmax"
-    )(x)
-
-    model = tf.keras.Model(inputs, outputs)
-
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"]
-    )
+        print("Model Loaded Successfully.")
 
     return model

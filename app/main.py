@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 import os
 import shutil
 
+from app.prediction import predict_species
+
 app = FastAPI(
     title="WildSight AI Service",
     description="AI Powered Wildlife Species Recognition API",
@@ -33,17 +35,20 @@ def health():
 
 
 @app.post("/predict-image")
-async def upload_image(file: UploadFile = File(...)):
+async def predict_image(file: UploadFile = File(...)):
 
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    prediction = predict_species(file_path)
+
     return JSONResponse(
         {
-            "message": "Image uploaded successfully",
-            "filename": file.filename,
-            "path": file_path
+            "status": "SUCCESS",
+            "predictedSpecies": prediction["species"].title(),
+            "confidence": prediction["confidence"],
+            "model": "MobileNetV2"
         }
     )
