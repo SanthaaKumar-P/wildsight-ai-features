@@ -5,7 +5,7 @@ from app.audio_constants import UPLOAD_AUDIO
 from app.species_api import router as species_router
 import os
 import shutil
-
+from app.yolo_detection import detect_animals
 from app.prediction import predict_species
 
 app = FastAPI(
@@ -64,3 +64,15 @@ async def predict_audio_api(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     return predict_audio(file_path)
+
+@app.post("/detect-animals")
+async def detect_animals_api(file: UploadFile = File(...)):
+
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    result = detect_animals(file_path)
+
+    return result
