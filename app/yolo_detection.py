@@ -22,7 +22,7 @@ def detect_animals(image_path):
 
     results = model.predict(
         source=str(image_path),
-        conf=0.4,
+        conf=0.10,
         verbose=False
     )
 
