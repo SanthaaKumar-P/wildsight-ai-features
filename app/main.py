@@ -1,22 +1,35 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+
 from app.audio_prediction import predict_audio
 from app.audio_constants import UPLOAD_AUDIO
 from app.species_api import router as species_router
-import os
-import shutil
 from app.yolo_detection import detect_animals
 from app.prediction import predict_species
+
+import os
+import shutil
+
 
 app = FastAPI(
     title="WildSight AI Service",
     description="AI Powered Wildlife Species Recognition API",
     version="1.0.0"
 )
+
 app.include_router(species_router)
+
 UPLOAD_FOLDER = "uploads"
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Serve uploaded and annotated images
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
+)
 
 
 @app.get("/")
@@ -55,6 +68,8 @@ async def predict_image(file: UploadFile = File(...)):
             "model": "MobileNetV2"
         }
     )
+
+
 @app.post("/predict-audio")
 async def predict_audio_api(file: UploadFile = File(...)):
 
@@ -64,6 +79,7 @@ async def predict_audio_api(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     return predict_audio(file_path)
+
 
 @app.post("/detect-animals")
 async def detect_animals_api(file: UploadFile = File(...)):
