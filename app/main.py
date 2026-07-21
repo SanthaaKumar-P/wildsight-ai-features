@@ -1,13 +1,13 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-
+from app.audio_detection import detect_audio_species
 from app.audio_prediction import predict_audio
 from app.audio_constants import UPLOAD_AUDIO
 from app.species_api import router as species_router
 from app.yolo_detection import detect_animals
 from app.prediction import predict_species
-
+from app.image_quality import assess_image_quality
 import os
 import shutil
 
@@ -92,3 +92,35 @@ async def detect_animals_api(file: UploadFile = File(...)):
     result = detect_animals(file_path)
 
     return result
+
+@app.post("/image-quality")
+async def image_quality(
+    file: UploadFile = File(...)
+):
+
+    file_path = os.path.join(
+        UPLOAD_FOLDER,
+        file.filename
+    )
+
+
+    with open(file_path,"wb") as buffer:
+
+        shutil.copyfileobj(
+            file.file,
+            buffer
+        )
+
+
+    result = assess_image_quality(
+        file_path
+    )
+
+
+    return {
+
+        "status":"SUCCESS",
+
+        "imageQuality":result
+
+    }

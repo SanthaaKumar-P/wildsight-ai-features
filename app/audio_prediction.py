@@ -1,34 +1,45 @@
-from birdnetlib import Recording
-from app.birdnet_loader import analyzer
+from app.birdnet_predictor import predict_bird
 
 
 def predict_audio(audio_path):
+    """
+    Predict bird species using BirdNET Analyzer.
+    """
 
-    recording = Recording(
-        analyzer,
-        str(audio_path)
-    )
+    result = predict_bird(audio_path)
 
-    recording.analyze()
-
-    if len(recording.detections) == 0:
-
+    if result is None:
         return {
             "status": "FAILED",
-            "predictedSpecies": "Unknown",
+            "species": "Unknown",
             "confidence": 0,
-            "model": "BirdNET"
+            "category": "Unknown",
+            "soundType": "Unknown",
+            "conservationStatus": "Unknown",
+            "environmentNoise": "Unknown",
+            "noiseFiltered": False,
+            "model": "BirdNET Analyzer"
         }
-
-    best = max(
-        recording.detections,
-        key=lambda x: x["confidence"]
-    )
 
     return {
         "status": "SUCCESS",
-        "predictedSpecies": best["common_name"],
-        "scientificName": best["scientific_name"],
-        "confidence": round(best["confidence"] * 100, 2),
-        "model": "BirdNET"
+
+        "species": result["species"],
+
+        "speciesCode": result["speciesCode"],
+
+        "confidence": result["confidence"],
+
+        "category": "Bird",
+
+        "soundType": "Bird Call",
+
+        # Placeholder values for now
+        "conservationStatus": "Protected",
+
+        "environmentNoise": "Low",
+
+        "noiseFiltered": True,
+
+        "model": "BirdNET Analyzer"
     }
