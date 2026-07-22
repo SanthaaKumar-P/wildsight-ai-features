@@ -329,7 +329,7 @@ taxonomy["kingdom"],
 taxonomy["phylum"],
 
 "class":
-taxonomy["class"],
+taxonomy["className"],
 
 "order":
 taxonomy["order"],

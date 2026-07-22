@@ -1,55 +1,84 @@
-from birdnet_analyzer import analyze
-from pathlib import Path
-import pandas as pd
-import uuid
+from app.taxonomy import get_taxonomy
+from birdnetlib import Recording
+from app.birdnet_loader import analyzer
 
-OUTPUT_FOLDER = Path("birdnet_results")
-OUTPUT_FOLDER.mkdir(exist_ok=True)
 
 
 def predict_bird(audio_path):
 
-    run_folder = OUTPUT_FOLDER / str(uuid.uuid4())
-    run_folder.mkdir(exist_ok=True)
 
-    analyze(
-        audio_input=str(audio_path),
-        output=str(run_folder),
-        top_n=5,
-        min_conf=0.20
+    recording = Recording(
+        analyzer,
+        str(audio_path)
     )
 
-    txt_files = list(
-        run_folder.glob("*.BirdNET.selection.table.txt")
+
+    recording.analyze()
+
+
+
+    if len(recording.detections) == 0:
+
+        return {
+
+            "status": "FAILED",
+
+            "species": "Unknown",
+
+            "confidence": 0,
+
+            "category": "Bird"
+
+        }
+
+
+
+    best = max(
+        recording.detections,
+        key=lambda x: x["confidence"]
     )
 
-    if len(txt_files) == 0:
-        return None
 
-    df = pd.read_csv(
-        txt_files[0],
-        sep="\t"
-    )
 
-    if df.empty:
-        return None
+    species = best["common_name"]
 
-    best = df.sort_values(
-        by="Confidence",
-        ascending=False
-    ).iloc[0]
+
+
+    # TAXONOMY LOOKUP
+
+    taxonomy = get_taxonomy(species)
+
+    confidence = round(best["confidence"] * 100, 2)
 
     return {
 
-        "species": best["Common Name"],
+    "species": species,
 
-        "speciesCode": best["Species Code"],
+    "scientificName": taxonomy["scientificName"],
 
-        "confidence": round(
-            float(best["Confidence"]) * 100,
-            2
-        ),
+    "kingdom": taxonomy["kingdom"],
 
-        "category": "Bird"
+    "phylum": taxonomy["phylum"],
 
-    }
+    "className": taxonomy["className"],
+
+    "order": taxonomy["order"],
+
+    "family": taxonomy["family"],
+
+    "genus": taxonomy["genus"],
+
+    "confidence": confidence,
+
+    "category": "Bird",
+
+    "soundType": "Bird Call",
+
+    "conservationStatus": "Protected",
+
+    "noiseFiltered": True,
+
+    "environmentNoise": "Unknown",
+
+    "model": "BirdNET Analyzer"
+}
